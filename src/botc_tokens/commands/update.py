@@ -31,14 +31,42 @@ def _parse_args():
     parser = argparse.ArgumentParser(description='Download roles from the wiki, with associated icon and description.')
     parser.add_argument('-o', '--output-dir', type=str, default='inputs',
                         help="Directory in which to write the json and icon files (Default: 'inputs')")
-    parser.add_argument('--script-filter', type=str, default='Experimental',
-                        help="Filter for scripts to pull (Default: 'Experimental')")
+    parser.add_argument('--script-filter', type=str, default='',
+                        help="Filter for scripts to pull (Example: 'Experimental')")
     parser.add_argument('--reminders', type=str,
                         help="JSON file to override reminder guesses from the wiki.")
     parser.add_argument('-c', '--custom-list', type=str, default=None,
                         help="JSON file with a custom list of roles to update.")
     args = parser.parse_args(sys.argv[2:])
     return args
+
+
+def _should_skip(role):
+    """Determine if a role should be skipped."""
+    # Bloodstar uses bare strings for built-in roles. If we see one, we need to pull data from official wiki and
+    # see if we can find a match.
+    if isinstance(role, str):
+        # Remove underscores for better matching
+        rolename = role.replace("_", "")
+        print(f"[yellow]Warning:[/] Role '{rolename}' does not have any data. Checking the official wiki.")
+        if not hasattr(_should_skip, "official_wiki"):
+            _should_skip.official_wiki = WikiSoup("")
+            _should_skip.official_wiki.load_from_web()
+        # Match on either ID or Name
+        try:
+            role = next(
+                role for role in _should_skip.official_wiki.role_data
+                if role.get("name") == rolename or role.get("id") == rolename
+            )
+        except StopIteration:
+            print(f"[red]Error:[/] Unable to find '{rolename}' in official wiki. Skipping.")
+            return True
+    if role.get("id") == "_meta":  # Skip the metadata
+        return True
+    if not role.get("name"):
+        print(f"[red]Error:[/] Skipping id: '{role['id']}' because it has no name.")
+        return True
+    return False
 
 
 def run():
@@ -75,11 +103,7 @@ def run():
         # Step through each role and grab the relevant data before adding it to the list.
         overall_progress.update(role_task, total=len(wiki.role_data))
         for role in wiki.role_data:
-            if role.get("id") == "_meta":  # Skip the metadata
-                overall_progress.update(role_task, advance=1)
-                continue
-            if not role.get("name"):
-                print(f"[red]Error:[/] Skipping id: '{role['id']}' because it has no name.")
+            if _should_skip(role):
                 overall_progress.update(role_task, advance=1)
                 continue
             step_progress.update(step_task, description=f"Found role: {role['name']}")
