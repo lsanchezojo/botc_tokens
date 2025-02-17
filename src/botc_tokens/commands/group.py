@@ -37,19 +37,27 @@ def _parse_args():
     parser.add_argument('--fixed-reminder-size', type=int, default=None,
                         help="The radius (in pixels) to allocate per reminder tokens. "
                              "(Default: The first token's largest dimension)")
+    margin_default = 74
+    parser.add_argument('--margin-horizontal', type=int, default=margin_default,
+                        help=f"The margin (in pixels) between the left/right edge of the paper and the tokens. "
+                             f"(Default: {margin_default})")
+    parser.add_argument('--margin-vertical', type=int, default=margin_default,
+                        help=f"The margin (in pixels) between the top/bottom of the paper and the tokens. "
+                             f"(Default: {margin_default})")
     padding_default = 0
     parser.add_argument('--padding', type=int, default=padding_default,
                         help=f"The padding (in pixels) between tokens. (Default: {padding_default})")
-    paper_width_default = 2402
+    paper_width_default = 2550
     parser.add_argument('--paper-width', type=int, default=paper_width_default,
                         help="The width (in pixels) of the paper to use for the tokens. "
                              f"(Default: {paper_width_default})")
-    paper_height_default = 3152
+    paper_height_default = 3300
     parser.add_argument('--paper-height', type=int, default=paper_height_default,
                         help="The height (in pixels) of the paper to use for the tokens. "
                              f"(Default: {paper_height_default})")
     parser.add_argument('--duplicates', type=str, default=None,
                         help="A json file containing the number of duplicates to add for each role.")
+    parser.add_argument("--grid", action="store_true", help="Use a grid layout instead of close packing.")
     args = parser.parse_args(sys.argv[2:])
     return args
 
@@ -97,16 +105,22 @@ def run():
             basename="roles",
             page_width=args.paper_width,
             page_height=args.paper_height,
+            margin_vertical=args.margin_vertical,
+            margin_horizontal=args.margin_horizontal,
             padding=args.padding,
-            diameter=args.fixed_role_size
+            diameter=args.fixed_role_size,
+            close_packing=not args.grid
         )
         reminder_page = Printable(
             output_dir,
             basename="reminders",
             page_width=args.paper_width,
             page_height=args.paper_height,
+            margin_vertical=args.margin_vertical,
+            margin_horizontal=args.margin_horizontal,
             padding=args.padding,
-            diameter=args.fixed_reminder_size
+            diameter=args.fixed_reminder_size,
+            close_packing = not args.grid
         )
         process_tokens(duplicates, duplicates_overrides, reminder_images, reminder_page, role_images, role_page, script,
                        step_progress, step_task)
