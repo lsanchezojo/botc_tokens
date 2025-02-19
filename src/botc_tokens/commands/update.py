@@ -37,6 +37,8 @@ def _parse_args():
                         help="JSON file to override reminder guesses from the wiki.")
     parser.add_argument('-c', '--custom-list', type=str, default=None,
                         help="JSON file with a custom list of roles to update.")
+    parser.add_argument('--use-playtest', action='store_true',
+                        help="Use the playtest icon source instead of the wiki.")
     args = parser.parse_args(sys.argv[2:])
     return args
 
@@ -118,9 +120,10 @@ def run():
 
             role_output_path = output_path / version / team
             role_output_path.mkdir(parents=True, exist_ok=True)
-            role_file = role_output_path / f"{format_filename(role['name'])}.json"
+            role_file = role_output_path / f"{format_filename(role['id'])}.json"
 
-            found_role = process_role(role, role_file, wiki, step_progress, step_task, role_output_path)
+            found_role = \
+                process_role(role, role_file, wiki, step_progress, step_task, role_output_path, args.use_playtest)
 
             if found_role is not None:
                 # Check if the role is in our forced_setup list
@@ -166,7 +169,7 @@ def prep_wiki(script_filter, custom_list=None):
     return wiki
 
 
-def process_role(role, file, wiki, step_progress, step_task, role_output_path):
+def process_role(role, file, wiki, step_progress, step_task, role_output_path, use_playtest=False):
     """Process a role, grabbing the relevant data and returning a Role object.
 
     Args:
@@ -176,6 +179,7 @@ def process_role(role, file, wiki, step_progress, step_task, role_output_path):
         step_progress (Progress): The progress bar to update.
         step_task (int): The task to update.
         role_output_path (Path): The path to write the role file to.
+        use_playtest (bool): Whether to use the playtest icon source instead of the wiki.
     """
     name = role['name']
     found_role = Role(name=name)
@@ -231,12 +235,12 @@ def process_role(role, file, wiki, step_progress, step_task, role_output_path):
 
     # Grab the icon, checking first to see if it exists
     step_progress.update(step_task, description=f"Getting icon for {name}")
-    get_role_icon(found_role, role, role_output_path, wiki)
+    get_role_icon(found_role, role, role_output_path, wiki, use_playtest)
 
     return found_role
 
 
-def get_role_icon(found_role, role, role_output_path, wiki):
+def get_role_icon(found_role, role, role_output_path, wiki, use_playtest=False):
     """Get the icon for a role, using the wiki if needed.
 
     Args:
@@ -244,6 +248,7 @@ def get_role_icon(found_role, role, role_output_path, wiki):
         role (dict): The role data from the script tool or custom list.
         role_output_path (Path): The path to write the icon to.
         wiki (WikiSoup): The wiki soup object.
+        use_playtest (bool): Whether to use the playtest icon source instead of the wiki.
     """
     if found_role.icon:
         icon_path = role_output_path / found_role.icon
@@ -253,20 +258,31 @@ def get_role_icon(found_role, role, role_output_path, wiki):
     if role.get("image"):
         img = role.get("image")
         if isinstance(img, list):
-            # Empty lists would already be caught by the check above.
+            # Empty lists would already be caught by previous checks.
             # Since we don't support multiple icons, just take the first one. It should match the team alignment.
             icon_url = img[0]
         else:
             icon_url = img
     else:
-        try:
-            icon_url = wiki.get_big_icon_url(found_role.name)
-        except RuntimeError as e:
-            print(f"[red]Error:[/] No icon found for {found_role.name}: {str(e)}")
-            return
-        icon_url = urllib.parse.urljoin("https://wiki.bloodontheclocktower.com", icon_url)
+        if use_playtest:
+            filename = ''.join(e for e in found_role.name.lower() if e.isalnum())
+            icon_url = f"https://github.com/tomozbot/botc-icons/raw/main/PNG/{filename}.png"
+        else:
+            try:
+                icon_url = wiki.get_big_icon_url(found_role.name)
+            except RuntimeError as e:
+                print(f"[red]Error:[/] No icon found for {found_role.name}: {str(e)}")
+                return
+            icon_url = urllib.parse.urljoin("https://wiki.bloodontheclocktower.com", icon_url)
     icon_path = role_output_path / f"{format_filename(found_role.name)}{Path(icon_url).suffix}"
     icon_path.parent.mkdir(parents=True, exist_ok=True)
+    if not save_icon(found_role, icon_path, icon_url):
+        return
+    found_role.icon = str(icon_path.name)
+
+
+def save_icon(found_role, icon_path, icon_url):
+    """Download (if needed) and save the icon for a role."""
     if not icon_path.exists():
         # Load the image from the web
         try:
@@ -281,13 +297,13 @@ def get_role_icon(found_role, role, role_output_path, wiki):
                 image_bits = urlopen(req).read()
             except HTTPError:
                 print(f"[red]Error:[/] Unable to download icon for {found_role.name}: {str(e)}")
-                return
+                return False
         # Parse the image
         with Image(blob=image_bits) as img:
             # Remove the extra space around the icon
             img.trim(color=Color('rgba(0,0,0,0)'), fuzz=0)
             img.save(filename=str(icon_path))
-    found_role.icon = str(icon_path.name)
+    return True
 
 
 def get_role_ability(name, wiki):

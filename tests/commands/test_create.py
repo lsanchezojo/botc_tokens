@@ -64,8 +64,8 @@ def default_expected_files():
         expected_files.append(str(Path("999 - Tests") / "Not-In-Play" / f"{i}.png"))
         expected_files.append(str(Path("999 - Tests") / "Not-In-Play" / f"{i}-Reminder-Reminder_{i}.png"))
     # Add the space role
-    expected_files.append(str(Path("999 - Tests") / "Not-In-Play" / "Space_Role.png"))
-    expected_files.append(str(Path("999 - Tests") / "Not-In-Play" / "Space_Role-Reminder-This_has_spaces.png"))
+    expected_files.append(str(Path("999 - Tests") / "Not-In-Play" / "spacerole.png"))
+    expected_files.append(str(Path("999 - Tests") / "Not-In-Play" / "spacerole-Reminder-This_has_spaces.png"))
     return expected_files
 
 
