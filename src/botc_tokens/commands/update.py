@@ -120,7 +120,7 @@ def run():
 
             role_output_path = output_path / version / team
             role_output_path.mkdir(parents=True, exist_ok=True)
-            role_file = role_output_path / f"{format_filename(role['name'])}.json"
+            role_file = role_output_path / f"{format_filename(role['id'])}.json"
 
             found_role = \
                 process_role(role, role_file, wiki, step_progress, step_task, role_output_path, args.use_playtest)

@@ -72,13 +72,14 @@ def run():
         overall_task = overall_progress.add_task("Creating Tokens...", total=len(roles))
         step_task = step_progress.add_task("Reading roles...")
         for role in roles:
+            role_slug = ''.join(e for e in role.name.lower() if e.isalnum())
             step_progress.update(step_task, description=f"Creating Token for: {role.name}")
             # Make sure our target directory exists
             role_output_path = output_path / str(role.home_script) / str(role.type)
             role_output_path.mkdir(parents=True, exist_ok=True)
 
             # Skip if the token already exists
-            token_output_path = role_output_path / f"{format_filename(role.name)}.png"
+            token_output_path = role_output_path / f"{role_slug}.png"
             if token_output_path.exists():
                 continue
 
@@ -97,7 +98,7 @@ def run():
             reminder_icon.transform(resize=f"{target_width}x{target_height}")
             for reminder_text in role.reminders:
                 step_progress.update(step_task, description=f"Creating Token for: {role.name}")
-                reminder_name = format_filename(f"{role.name}-Reminder-{reminder_text}")
+                reminder_name = format_filename(f"{role_slug}-Reminder-{reminder_text}")
                 reminder_output_path = role_output_path / f"{reminder_name}.png"
                 duplicate_counter = 1
                 while reminder_output_path.exists():
