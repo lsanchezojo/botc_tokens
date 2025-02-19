@@ -30,8 +30,8 @@ class Printable:
             page_width (int): The width of the page in pixels.
             page_height (int): The height of the page in pixels.
             basename (str): The base name to use for the pages.
+            margin_horizontal (int): The margin (in pixels) between the left/right edge of the paper and the tokens.
             margin_vertical (int): The margin (in pixels) between the top/bottom of the paper and the tokens.
-            margin_vertical (int): The margin (in pixels) between the left/right edge of the paper and the tokens.
             padding (int): The padding (in pixels) between tokens.
             diameter (int): The diameter (in pixels) to allocate per token. If unspecified, the first token's largest
                 dimension will be used.

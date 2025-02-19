@@ -59,6 +59,14 @@ def _parse_args():
                         help="A json file containing the number of duplicates to add for each role.")
     parser.add_argument("--grid", action="store_true", help="Use a grid layout instead of close packing.")
     args = parser.parse_args(sys.argv[2:])
+
+    # Check to make sure that the margin leaves enough room for the tokens
+    if args.paper_width - (args.margin_horizontal * 2) <= 0:
+        print("[red]Error:[/] The horizontal margin is too large for the paper width. Setting horizontal margin to 0.")
+        args.margin_horizontal = 0
+    if args.paper_height - (args.margin_vertical * 2) <= 0:
+        print("[red]Error:[/] The vertical margin is too large for the paper height. Setting vertical margin to 0.")
+    args.margin_vertical = 0
     return args
 
 
@@ -120,7 +128,7 @@ def run():
             margin_horizontal=args.margin_horizontal,
             padding=args.padding,
             diameter=args.fixed_reminder_size,
-            close_packing = not args.grid
+            close_packing=not args.grid
         )
         process_tokens(duplicates, duplicates_overrides, reminder_images, reminder_page, role_images, role_page, script,
                        step_progress, step_task)

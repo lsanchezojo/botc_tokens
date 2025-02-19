@@ -356,3 +356,9 @@ def test_forced_setup(tmp_path, capsys):
     with open(output_path / "99 - Ignored" / "outsider" / "Third.json", "r") as f:
         j = json.load(f)
     assert j["affects_setup"] is True
+
+
+def test_use_playtest(tmp_path):
+    """Use the playtest wiki instead of the main one."""
+    output_path = tmp_path / "roles"
+    _run_cmd(["--output", str(output_path), "--use-playtest"])

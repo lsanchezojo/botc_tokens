@@ -276,6 +276,13 @@ def get_role_icon(found_role, role, role_output_path, wiki, use_playtest=False):
             icon_url = urllib.parse.urljoin("https://wiki.bloodontheclocktower.com", icon_url)
     icon_path = role_output_path / f"{format_filename(found_role.name)}{Path(icon_url).suffix}"
     icon_path.parent.mkdir(parents=True, exist_ok=True)
+    if not save_icon(found_role, icon_path, icon_url):
+        return
+    found_role.icon = str(icon_path.name)
+
+
+def save_icon(found_role, icon_path, icon_url):
+    """Download (if needed) and save the icon for a role."""
     if not icon_path.exists():
         # Load the image from the web
         try:
@@ -290,13 +297,13 @@ def get_role_icon(found_role, role, role_output_path, wiki, use_playtest=False):
                 image_bits = urlopen(req).read()
             except HTTPError:
                 print(f"[red]Error:[/] Unable to download icon for {found_role.name}: {str(e)}")
-                return
+                return False
         # Parse the image
         with Image(blob=image_bits) as img:
             # Remove the extra space around the icon
             img.trim(color=Color('rgba(0,0,0,0)'), fuzz=0)
             img.save(filename=str(icon_path))
-    found_role.icon = str(icon_path.name)
+    return True
 
 
 def get_role_ability(name, wiki):

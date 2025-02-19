@@ -103,6 +103,8 @@ def test_page_overflow(example_script, token_dir, tmp_path):
         "--paper-width", "256",
         "--paper-height", "128",
         "--padding", "0",
+        "--margin-horizontal", "0",
+        "--margin-vertical", "0",
         "--fixed-role-size", "128",
         "--fixed-reminder-size", "256"
     ])
@@ -189,6 +191,8 @@ def test_known_duplicates_file(token_dir, tmp_path, test_data_dir):
         "--paper-width", "256",
         "--paper-height", "256",
         "--padding", "0",
+        "--margin-horizontal", "0",
+        "--margin-vertical", "0",
         "--fixed-role-size", "128"
     ])
     with open(output_path / "roles.pdf", "rb") as f:
@@ -208,6 +212,8 @@ def test_valid_duplicates_file(token_dir, tmp_path):
         "--paper-width", "256",
         "--paper-height", "256",
         "--padding", "0",
+        "--margin-horizontal", "0",
+        "--margin-vertical", "0",
         "--fixed-role-size", "128",
         "--duplicates", str(duplicates_file)
     ])
@@ -225,3 +231,44 @@ def test_invalid_duplicates_file(token_dir, tmp_path, capsys):
     _run_cmd([str(token_dir), "-o", str(output_path), "--duplicates", str(duplicates_file)])
     output = capsys.readouterr()
     assert "does not match the schema:" in output.out
+
+
+def test_grid_layout(example_script, token_dir, tmp_path):
+    """Use a grid layout."""
+    output_path = tmp_path / "output"
+    _run_cmd([
+        str(token_dir),
+        "-o", str(output_path),
+        "--paper-width", "196",
+        "--paper-height", "240",
+        "--padding", "0",
+        "--margin-horizontal", "0",
+        "--margin-vertical", "0",
+        "--fixed-role-size", "128",
+        "--grid"
+    ])
+
+    with open(output_path / "roles.pdf", "rb") as f:
+        reader = PdfReader(f)
+        assert len(reader.pages) == 8
+
+
+def test_margin_overage(example_script, token_dir, tmp_path, capsys):
+    """Test that the page overflow works."""
+    output_path = tmp_path / "output"
+    _run_cmd([
+        str(example_script),
+        "--token-dir", str(token_dir),
+        "-o", str(output_path),
+        "--paper-width", "256",
+        "--paper-height", "256",
+        "--padding", "0",
+        "--margin-horizontal", "128",
+        "--margin-vertical", "128",
+        "--fixed-role-size", "128"
+    ])
+
+    expected_files = ["roles.pdf", "reminders.pdf"]
+    check_output_folder(output_path, expected_files=expected_files)
+    output = capsys.readouterr()
+    assert "margin to 0." in output.out
