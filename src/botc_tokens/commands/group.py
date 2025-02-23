@@ -60,19 +60,21 @@ def _parse_args():
     parser.add_argument("--grid", action="store_true", help="Use a grid layout instead of close packing.")
     args = parser.parse_args(sys.argv[2:])
 
-    # Check to make sure that the margin leaves enough room for the tokens
-    if args.paper_width - (args.margin_horizontal * 2) <= 0:
-        print("[red]Error:[/] The horizontal margin is too large for the paper width. Setting horizontal margin to 0.")
-        args.margin_horizontal = 0
-    if args.paper_height - (args.margin_vertical * 2) <= 0:
-        print("[red]Error:[/] The vertical margin is too large for the paper height. Setting vertical margin to 0.")
-    args.margin_vertical = 0
     return args
 
 
 def run():
     """Create printable sheets based on a script json file."""
     args = _parse_args()
+
+    # Check to make sure that the margin leaves enough room for the tokens
+    if args.paper_width - (args.margin_horizontal * 2) <= 0:
+        print("[red]Error:[/] The horizontal margin is too large for the paper width.")
+        return 1
+    if args.paper_height - (args.margin_vertical * 2) <= 0:
+        print("[red]Error:[/] The vertical margin is too large for the paper height.")
+        return 1
+
     # Ensure the script file/directory exists
 
     # Read the script json file
