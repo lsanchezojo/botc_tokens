@@ -253,8 +253,48 @@ def test_grid_layout(example_script, token_dir, tmp_path):
         assert len(reader.pages) == 8
 
 
-def test_margin_overage(example_script, token_dir, tmp_path, capsys):
+def test_horizontal_margin_overage(example_script, token_dir, tmp_path, capsys):
     """Test that the page overflow works."""
+    output_path = tmp_path / "output"
+    return_code = _run_cmd([
+        str(example_script),
+        "--token-dir", str(token_dir),
+        "-o", str(output_path),
+        "--paper-width", "256",
+        "--paper-height", "256",
+        "--padding", "0",
+        "--margin-horizontal", "128",
+        "--fixed-role-size", "128"
+    ])
+
+    assert return_code == 1
+
+    output = capsys.readouterr()
+    assert "horizontal margin is too large" in output.out
+
+
+def test_vertical_margin_overage(example_script, token_dir, tmp_path, capsys):
+    """Test that the page overflow works."""
+    output_path = tmp_path / "output"
+    return_code = _run_cmd([
+        str(example_script),
+        "--token-dir", str(token_dir),
+        "-o", str(output_path),
+        "--paper-width", "256",
+        "--paper-height", "256",
+        "--padding", "0",
+        "--margin-vertical", "128",
+        "--fixed-role-size", "128"
+    ])
+
+    assert return_code == 1
+
+    output = capsys.readouterr()
+    assert "vertical margin is too large" in output.out
+
+
+def test_horizontal_margin(example_script, token_dir, tmp_path):
+    """Test that setting a horizontal margin works."""
     output_path = tmp_path / "output"
     _run_cmd([
         str(example_script),
@@ -263,12 +303,31 @@ def test_margin_overage(example_script, token_dir, tmp_path, capsys):
         "--paper-width", "256",
         "--paper-height", "256",
         "--padding", "0",
-        "--margin-horizontal", "128",
-        "--margin-vertical", "128",
+        "--margin-horizontal", "64",
+        "--fixed-role-size", "128",
+        "--grid"
+    ])
+
+    with open(output_path / "roles.pdf", "rb") as f:
+        reader = PdfReader(f)
+        assert len(reader.pages) == 3
+
+
+def test_vertical_margin(example_script, token_dir, tmp_path):
+    """Test that setting a vertical margin works."""
+    output_path = tmp_path / "output"
+
+    _run_cmd([
+        str(example_script),
+        "--token-dir", str(token_dir),
+        "-o", str(output_path),
+        "--paper-width", "256",
+        "--paper-height", "256",
+        "--padding", "0",
+        "--margin-vertical", "64",
         "--fixed-role-size", "128"
     ])
 
-    expected_files = ["roles.pdf", "reminders.pdf"]
-    check_output_folder(output_path, expected_files=expected_files)
-    output = capsys.readouterr()
-    assert "margin to 0." in output.out
+    with open(output_path / "roles.pdf", "rb") as f:
+        reader = PdfReader(f)
+        assert len(reader.pages) == 3
