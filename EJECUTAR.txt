@@ -1,0 +1,25 @@
+1. Abre una terminal en la carpeta donde quieras instalar el proyecto.
+2. Crea un entorno virtual (por ejemplo, en una carpeta llamada venv):
+python -m venv venv
+3. Activa el entorno virtual:
+-> En Windows CMD:
+venv\Scripts\activate
+-> En PowerShell:
+.\venv\Scripts\Activate.ps1
+4. Instala el proyecto localmente dentro del entorno virtual:
+pip install .
+5. Ahora el comando botc_tokens estará disponible dentro del entorno virtual, en la ruta venv\Scripts\botc_tokens.exe.
+De esta forma, todo queda contenido en la carpeta venv y puedes moverla o eliminarla cuando quieras, sin afectar el resto del sistema.
+
+#Descarga de recursos de la wiki oficial
+botc_tokens update --output-dir "C:\Dev\workspace\botc_tokens\output\carousel"
+
+#inputs
+lanzar split_carousel_json.py para partir el fichero con todos los tokens de personajes en un fichero por cada personaje. hay que volcar estos json creados en la carpeta inputs, junto a sus iconos.
+
+#Crear tokens, debe existir la carpeta inputs (esto usa la alternativa3 de token. No incluir --components si se quiere el token por defecto)
+PS C:\Dev\workspace\botc_tokens\output\carousel> botc_tokens create --components=C:\Dev\workspace\botc_tokens\examples\component_packs\Alternate3 ./inputs -o ./tokens
+
+#printable:
+Original size: botc_tokens group tokens --output-dir printables --fixed-role-size 575 --fixed-reminder-size 325 --padding 15 --paper-width 2402 --paper-height 3152
+Mini-travel size: botc_tokens group tokens --output-dir printables --fixed-role-size 375 --fixed-reminder-size 205 --padding 15 --paper-width 2402 --paper-height 3152
