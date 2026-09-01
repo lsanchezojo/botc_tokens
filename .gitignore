@@ -8,6 +8,10 @@ tokens_*
 token_*
 printables
 bugs
+output
+output_*
+.vscode
+EJECUTAR.txt
 
 ## MacOS ##
 # General

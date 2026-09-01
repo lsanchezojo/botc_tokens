@@ -34,6 +34,8 @@ def fit_ability_text(text, font_size, first_line_width, step, components):
         has_bracket = (original_text[-1] == "]")
         lines = [1, 2, 3, 4, 5]
         while len(lines) > 4:
+        #lines = [1, 2, 3, 4, 5, 6]
+        #while len(lines) > 5:
             text = original_text
             line_text = text
             lines = []
