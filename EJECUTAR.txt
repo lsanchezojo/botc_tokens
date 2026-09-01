@@ -15,7 +15,10 @@ De esta forma, todo queda contenido en la carpeta venv y puedes moverla o elimin
 botc_tokens update --output-dir "C:\Dev\workspace\botc_tokens\output\carousel"
 
 #inputs
-lanzar split_carousel_json.py para partir el fichero con todos los tokens de personajes en un fichero por cada personaje. hay que volcar estos json creados en la carpeta inputs, junto a sus iconos.
+lanzar scripts/split_carousel_json.py para partir el fichero con todos los tokens de personajes en un fichero por cada personaje.
+Se ejecuta desde la carpeta que contiene carousel_ES.json (crea una subcarpeta por cada "type"):
+PS C:\Dev\workspace\botc_tokens\output\carousel> python ..\..\scripts\split_carousel_json.py
+hay que volcar estos json creados en la carpeta inputs, junto a sus iconos.
 
 #Crear tokens, debe existir la carpeta inputs (esto usa la alternativa3 de token. No incluir --components si se quiere el token por defecto)
 PS C:\Dev\workspace\botc_tokens\output\carousel> botc_tokens create --components=C:\Dev\workspace\botc_tokens\examples\component_packs\Alternate3 ./inputs -o ./tokens
